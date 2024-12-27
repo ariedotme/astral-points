@@ -1,0 +1,20 @@
+name: Skeleton
+components:
+  - name: health
+    properties:
+      current: 100.0
+      max: 100.0
+  - name: position
+    properties:
+      coords:
+        x: 0.0
+        y: 0.0
+        z: 0.0
+      yaw: 0.0
+      pitch: 0.0
+      map_id: "map01"
+  - name: item
+    properties:
+      display_name: "Rusty Sword"
+      description: "A worn-out sword carried by the skeleton."
+      weight: 2.5
