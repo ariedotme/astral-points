@@ -1,20 +1,23 @@
-use crate::{models::component::NamedComponent, utils::spatial_utils::Vector3};
+use std::any::Any;
+
+use crate::{
+    models::component::{Component, NamedComponent},
+    utils::spatial_utils::Vector3,
+};
 
 #[derive(Debug, Clone)]
 pub struct Position {
     pub coords: Vector3,
+    pub rotation: Vector3,
     pub map_id: String, // nano_id(8)
-    pub yaw: f32,
-    pub pitch: f32,
 }
 
 impl Position {
-    pub fn new(coords: Vector3, yaw: f32, pitch: f32, map_id: String) -> Self {
+    pub fn new(coords: Vector3, rotation: Vector3, map_id: String) -> Self {
         Self {
             coords,
             map_id,
-            yaw,
-            pitch,
+            rotation,
         }
     }
 
@@ -26,9 +29,14 @@ impl Position {
         self.coords = coords;
     }
 
-    pub fn set_rotation(&mut self, yaw: f32, pitch: f32) {
-        self.yaw = yaw;
-        self.pitch = pitch;
+    pub fn set_rotation(&mut self, rotation: Vector3) {
+        self.rotation = rotation;
+    }
+}
+
+impl Component for Position {
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

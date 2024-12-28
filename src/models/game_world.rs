@@ -3,12 +3,14 @@ use std::collections::HashMap;
 
 #[derive(Debug)]
 pub struct GameWorld {
+    pub map_id: String,
     pub entities: HashMap<EntityId, Entity>,
 }
 
 impl GameWorld {
-    pub fn new() -> Self {
+    pub fn new(map_id: String) -> Self {
         Self {
+            map_id,
             entities: HashMap::new(),
         }
     }

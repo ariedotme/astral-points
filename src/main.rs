@@ -1,12 +1,15 @@
 use axum::{routing::get, Extension, Router};
 use config::entity_template::{create_entity_from_template, load_entity_template};
+use models::{components::health::Health, entity::Entity};
 use std::net::SocketAddr;
 use tracing_subscriber;
 
 mod config;
+mod graphics;
 mod models;
 mod routes;
 mod services;
+mod tests;
 mod utils;
 
 #[tokio::main]

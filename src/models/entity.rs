@@ -23,25 +23,25 @@ impl Entity {
         if self.components.contains_key(T::NAME) {
             false
         } else {
+            println!("Adding component: {}", T::NAME);
             self.components.insert(T::NAME, Box::new(component));
             true
         }
     }
 
     pub fn get_component<T: Component + NamedComponent + 'static>(&self) -> Option<&T> {
-        self.components
-            .get(T::NAME)
-            .and_then(|comp| comp.as_any().downcast_ref::<T>())
+        println!("Getting component: {}", T::NAME);
+        self.components.get(T::NAME)?.as_any().downcast_ref::<T>()
+    }
+
+    pub fn has_component<T: NamedComponent>(&self) -> bool {
+        self.components.contains_key(T::NAME)
     }
 
     pub fn remove_component<T: Component + NamedComponent + 'static>(
         &mut self,
     ) -> Option<Box<dyn Component>> {
         self.components.remove(T::NAME)
-    }
-
-    pub fn has_component<T: Component + NamedComponent + 'static>(&self) -> bool {
-        self.components.contains_key(T::NAME)
     }
 
     pub fn add_part(&mut self, part: Entity) {

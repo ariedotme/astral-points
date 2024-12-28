@@ -15,6 +15,7 @@ use crate::{
 #[serde(untagged)]
 pub enum PropertyValue {
     Int(i32),
+    UInt(u32),
     Float(f32),
     String(String),
     Bool(bool),
@@ -27,6 +28,12 @@ pub enum PropertyValue {
 pub struct EntityTemplate {
     pub name: String,
     pub components: Vec<ComponentTemplate>,
+    #[serde(default)]
+    pub children: Vec<EntityTemplate>,
+}
+
+fn default_children() -> Vec<EntityTemplate> {
+    Vec::new()
 }
 
 #[derive(Debug, Deserialize)]
@@ -44,59 +51,138 @@ pub async fn load_entity_template(
     Ok(template)
 }
 
+macro_rules! extract_property {
+    ($map:expr, $key:expr, $variant:path) => {
+        match $map.get($key) {
+            Some($variant(value)) => value.clone(),
+            _ => panic!("Property {} not found", $key),
+        }
+    };
+}
+
+macro_rules! extract_property_option {
+    ($map:expr, $key:expr, $variant:path) => {
+        match $map.get($key) {
+            Some($variant(value)) => Some(value.clone()),
+            _ => None,
+        }
+    };
+}
+
 pub fn create_entity_from_template(template: &EntityTemplate) -> Entity {
     let mut entity = Entity::new();
+
+    for child in &template.children {
+        let child_entity = create_entity_from_template(&child);
+        entity.add_part(child_entity);
+    }
 
     for component in &template.components {
         match component.name.as_str() {
             "health" => {
-                if let (Some(PropertyValue::Float(current)), Some(PropertyValue::Float(max))) = (
-                    component.properties.get("current"),
-                    component.properties.get("max"),
-                ) {
-                    entity.add_component(Health {
-                        current: *current,
-                        max: *max,
-                    });
-                }
+                let current =
+                    extract_property!(component.properties, "current", PropertyValue::Float);
+                let max = extract_property!(component.properties, "max", PropertyValue::Float);
+
+                entity.add_component(Health {
+                    current: current,
+                    max: max,
+                });
             }
             "position" => {
-                if let Some(PropertyValue::Map(coords)) = component.properties.get("coords") {
-                    if let (
-                        Some(PropertyValue::Float(x)),
-                        Some(PropertyValue::Float(y)),
-                        Some(PropertyValue::Float(z)),
-                    ) = (coords.get("x"), coords.get("y"), coords.get("z"))
-                    {
-                        entity.add_component(Position {
-                            coords: Vector3::new(*x, *y, *z),
-                            yaw: component
-                                .properties
-                                .get("yaw")
-                                .and_then(|p| match p {
-                                    PropertyValue::Float(v) => Some(*v),
-                                    _ => None,
-                                })
-                                .unwrap_or(0.0),
-                            pitch: component
-                                .properties
-                                .get("pitch")
-                                .and_then(|p| match p {
-                                    PropertyValue::Float(v) => Some(*v),
-                                    _ => None,
-                                })
-                                .unwrap_or(0.0),
-                            map_id: component
-                                .properties
-                                .get("map_id")
-                                .and_then(|p| match p {
-                                    PropertyValue::String(s) => Some(s.clone()),
-                                    _ => None,
-                                })
-                                .unwrap_or("unknown".to_string()),
-                        });
+                let coords = extract_property!(component.properties, "coords", PropertyValue::Map);
+                let x = extract_property!(coords, "x", PropertyValue::Float);
+                let y = extract_property!(coords, "y", PropertyValue::Float);
+                let z = extract_property!(coords, "z", PropertyValue::Float);
+
+                let rotation =
+                    extract_property!(component.properties, "rotation", PropertyValue::Map);
+                let yaw = extract_property!(rotation, "yaw", PropertyValue::Float);
+                let pitch = extract_property!(rotation, "pitch", PropertyValue::Float);
+                let roll = extract_property!(rotation, "roll", PropertyValue::Float);
+
+                let map_id =
+                    extract_property!(component.properties, "map_id", PropertyValue::String);
+
+                entity.add_component(Position {
+                    coords: Vector3::new(x, y, z),
+                    rotation: Vector3::new(yaw, pitch, roll),
+                    map_id: map_id.clone(),
+                });
+            }
+            "storage" => {
+                let capacity =
+                    extract_property!(component.properties, "capacity", PropertyValue::UInt);
+
+                let max_weight =
+                    extract_property!(component.properties, "max_weight", PropertyValue::Float);
+
+                let stored_items = extract_property_option!(
+                    component.properties,
+                    "stored_items",
+                    PropertyValue::List
+                )
+                .unwrap_or(&Vec::new())
+                .iter()
+                .filter_map(|item| {
+                    if let PropertyValue::String(s) = item {
+                        Some(s.clone())
+                    } else {
+                        None
                     }
-                }
+                })
+                .collect::<Vec<String>>();
+
+                entity.add_component(crate::models::components::storage::Storage {
+                    capacity,
+                    stored_items,
+                    max_weight,
+                });
+            }
+            "player" => {
+                let username =
+                    extract_property!(component.properties, "username", PropertyValue::String);
+
+                entity.add_component(crate::models::components::player::Player { username });
+            }
+            "name" => {
+                let firstname = extract_property_option!(
+                    component.properties,
+                    "firstname",
+                    PropertyValue::String
+                );
+
+                let lastname = extract_property_option!(
+                    component.properties,
+                    "lastname",
+                    PropertyValue::String
+                );
+
+                let nickname = extract_property_option!(
+                    component.properties,
+                    "nickname",
+                    PropertyValue::String
+                );
+
+                entity.add_component(crate::models::components::name::Name {
+                    firstname,
+                    lastname,
+                    nickname,
+                });
+            }
+            "item" => {
+                let display_name =
+                    extract_property!(component.properties, "display_name", PropertyValue::String);
+                let weight =
+                    extract_property!(component.properties, "weight", PropertyValue::Float);
+                let description =
+                    extract_property!(component.properties, "description", PropertyValue::String);
+
+                entity.add_component(crate::models::components::item::Item {
+                    display_name,
+                    weight,
+                    description,
+                });
             }
             // TODO: Handle other components
             _ => {}

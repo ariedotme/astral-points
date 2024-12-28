@@ -1,4 +1,8 @@
+use std::any::Any;
+
 use crate::models::component::{Component, NamedComponent};
+
+use super::health::Health;
 
 #[derive(Debug, Clone)]
 pub struct Name {
@@ -28,6 +32,12 @@ impl Name {
         } else {
             format!("{} {}", firstname, lastname)
         }
+    }
+}
+
+impl Component for Name {
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 

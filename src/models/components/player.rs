@@ -1,4 +1,6 @@
-use crate::models::component::NamedComponent;
+use std::any::Any;
+
+use crate::models::component::{Component, NamedComponent};
 
 #[derive(Debug, Clone)]
 pub struct Player {
@@ -10,6 +12,12 @@ impl Player {
         Self {
             username: username.to_string(),
         }
+    }
+}
+
+impl Component for Player {
+    fn as_any(&self) -> &dyn Any {
+        self
     }
 }
 
