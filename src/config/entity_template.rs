@@ -1,11 +1,15 @@
-use std::collections::HashMap;
+use futures::future::BoxFuture;
+use std::{collections::HashMap, future::Future, pin::Pin};
 use tokio::fs;
 
 use serde::{Deserialize, Serialize};
 
 use crate::{
     models::{
-        components::{health::Health, position::Position},
+        components::{
+            health::Health, item::Item, name::Name, player::Player, position::Position,
+            storage::Storage,
+        },
         entity::Entity,
     },
     utils::spatial_utils::Vector3,
@@ -26,10 +30,16 @@ pub enum PropertyValue {
 
 #[derive(Debug, Deserialize)]
 pub struct EntityTemplate {
-    pub name: String,
+    pub name: Option<String>,
+    pub template: Option<String>,
+    #[serde(default)]
     pub components: Vec<ComponentTemplate>,
     #[serde(default)]
     pub children: Vec<EntityTemplate>,
+}
+
+fn default_components() -> Vec<ComponentTemplate> {
+    Vec::new()
 }
 
 fn default_children() -> Vec<EntityTemplate> {
@@ -69,11 +79,16 @@ macro_rules! extract_property_option {
     };
 }
 
-pub fn create_entity_from_template(template: &EntityTemplate) -> Entity {
+pub async fn create_entity_from_template(template: &EntityTemplate) -> Entity {
+    if let Some(template_name) = &template.template {
+        let new_template = load_entity_template(&template_name).await.unwrap();
+        return Box::pin(create_entity_from_template(&new_template)).await;
+    }
+
     let mut entity = Entity::new();
 
     for child in &template.children {
-        let child_entity = create_entity_from_template(&child);
+        let child_entity = Box::pin(create_entity_from_template(&child)).await;
         entity.add_part(child_entity);
     }
 
@@ -133,7 +148,7 @@ pub fn create_entity_from_template(template: &EntityTemplate) -> Entity {
                 })
                 .collect::<Vec<String>>();
 
-                entity.add_component(crate::models::components::storage::Storage {
+                entity.add_component(Storage {
                     capacity,
                     stored_items,
                     max_weight,
@@ -143,7 +158,7 @@ pub fn create_entity_from_template(template: &EntityTemplate) -> Entity {
                 let username =
                     extract_property!(component.properties, "username", PropertyValue::String);
 
-                entity.add_component(crate::models::components::player::Player { username });
+                entity.add_component(Player { username });
             }
             "name" => {
                 let firstname = extract_property_option!(
@@ -164,7 +179,7 @@ pub fn create_entity_from_template(template: &EntityTemplate) -> Entity {
                     PropertyValue::String
                 );
 
-                entity.add_component(crate::models::components::name::Name {
+                entity.add_component(Name {
                     firstname,
                     lastname,
                     nickname,
@@ -178,7 +193,7 @@ pub fn create_entity_from_template(template: &EntityTemplate) -> Entity {
                 let description =
                     extract_property!(component.properties, "description", PropertyValue::String);
 
-                entity.add_component(crate::models::components::item::Item {
+                entity.add_component(Item {
                     display_name,
                     weight,
                     description,

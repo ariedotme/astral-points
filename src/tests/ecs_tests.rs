@@ -34,7 +34,7 @@ mod tests {
         let rt = Runtime::new().unwrap();
         rt.block_on(async {
             let template = load_entity_template("skeleton").await.unwrap();
-            let entity = create_entity_from_template(&template);
+            let entity = create_entity_from_template(&template).await;
 
             assert_eq!(entity.get_component::<Health>().unwrap().current, 100.0);
             assert_eq!(entity.get_component::<Health>().unwrap().max, 100.0);
@@ -44,7 +44,7 @@ mod tests {
             assert_eq!(position.rotation, Vector3::new(0.0, 0.0, 0.0));
             assert_eq!(position.map_id, "map01");
 
-            let item = entity.get_component::<Item>().unwrap();
+            let item = entity.parts[0].get_component::<Item>().unwrap();
             assert_eq!(item.display_name, "Rusty Sword");
             assert_eq!(
                 item.description,

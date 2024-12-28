@@ -1,5 +1,5 @@
 use crate::models::component::{Component, NamedComponent};
-use std::collections::HashMap;
+use std::{collections::HashMap, future::Future};
 
 pub type EntityId = String;
 

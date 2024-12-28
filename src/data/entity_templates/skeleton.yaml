@@ -15,8 +15,5 @@ components:
         pitch: 0.0
         roll: 0.0
       map_id: "map01"
-  - name: item
-    properties:
-      display_name: "Rusty Sword"
-      description: "A worn-out sword carried by the skeleton."
-      weight: 2.5
+children:
+  - template: skeleton_bow

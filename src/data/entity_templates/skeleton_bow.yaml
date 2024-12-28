@@ -1,0 +1,7 @@
+name: skeleton_bow
+components:
+  - name: item
+    properties:
+      display_name: "Rusty Sword"
+      description: "A worn-out sword carried by the skeleton."
+      weight: 2.5
