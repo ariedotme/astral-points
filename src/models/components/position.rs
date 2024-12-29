@@ -1,19 +1,20 @@
 use std::any::Any;
 
 use crate::{
+    lua::lua_component::LuaComponent,
     models::component::{Component, NamedComponent},
-    utils::spatial_utils::Vector3,
+    utils::vector2::Vector2,
 };
 
 #[derive(Debug, Clone)]
 pub struct Position {
-    pub coords: Vector3,
-    pub rotation: Vector3,
+    pub coords: Vector2,
+    pub rotation: f32,
     pub map_id: String, // nano_id(8)
 }
 
 impl Position {
-    pub fn new(coords: Vector3, rotation: Vector3, map_id: String) -> Self {
+    pub fn new(coords: Vector2, rotation: f32, map_id: String) -> Self {
         Self {
             coords,
             map_id,
@@ -25,11 +26,11 @@ impl Position {
         self.map_id = map_id;
     }
 
-    pub fn set_coords(&mut self, coords: Vector3) {
+    pub fn set_coords(&mut self, coords: Vector2) {
         self.coords = coords;
     }
 
-    pub fn set_rotation(&mut self, rotation: Vector3) {
+    pub fn set_rotation(&mut self, rotation: f32) {
         self.rotation = rotation;
     }
 }
@@ -37,6 +38,10 @@ impl Position {
 impl Component for Position {
     fn as_any(&self) -> &dyn Any {
         self
+    }
+
+    fn to_lua_component(&self) -> LuaComponent {
+        LuaComponent::new(self.clone())
     }
 }
 

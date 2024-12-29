@@ -1,4 +1,3 @@
-use futures::future::BoxFuture;
 use std::{collections::HashMap, future::Future, pin::Pin};
 use tokio::fs;
 
@@ -12,7 +11,7 @@ use crate::{
         },
         entity::Entity,
     },
-    utils::spatial_utils::Vector3,
+    utils::vector2::Vector2,
 };
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -25,7 +24,7 @@ pub enum PropertyValue {
     Bool(bool),
     List(Vec<PropertyValue>),
     Map(HashMap<String, PropertyValue>),
-    Vec(Vector3),
+    Coords(Vector2),
 }
 
 #[derive(Debug, Deserialize)]
@@ -108,20 +107,16 @@ pub async fn create_entity_from_template(template: &EntityTemplate) -> Entity {
                 let coords = extract_property!(component.properties, "coords", PropertyValue::Map);
                 let x = extract_property!(coords, "x", PropertyValue::Float);
                 let y = extract_property!(coords, "y", PropertyValue::Float);
-                let z = extract_property!(coords, "z", PropertyValue::Float);
 
                 let rotation =
-                    extract_property!(component.properties, "rotation", PropertyValue::Map);
-                let yaw = extract_property!(rotation, "yaw", PropertyValue::Float);
-                let pitch = extract_property!(rotation, "pitch", PropertyValue::Float);
-                let roll = extract_property!(rotation, "roll", PropertyValue::Float);
+                    extract_property!(component.properties, "rotation", PropertyValue::Float);
 
                 let map_id =
                     extract_property!(component.properties, "map_id", PropertyValue::String);
 
                 entity.add_component(Position {
-                    coords: Vector3::new(x, y, z),
-                    rotation: Vector3::new(yaw, pitch, roll),
+                    coords: Vector2::new(x, y),
+                    rotation,
                     map_id: map_id.clone(),
                 });
             }

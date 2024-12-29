@@ -1,5 +1,6 @@
 pub mod component;
 pub mod components {
+    pub mod collider;
     pub mod health;
     pub mod item;
     pub mod name;

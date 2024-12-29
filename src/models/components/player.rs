@@ -1,6 +1,9 @@
 use std::any::Any;
 
-use crate::models::component::{Component, NamedComponent};
+use crate::{
+    lua::lua_component::LuaComponent,
+    models::component::{Component, NamedComponent},
+};
 
 #[derive(Debug, Clone)]
 pub struct Player {
@@ -18,6 +21,10 @@ impl Player {
 impl Component for Player {
     fn as_any(&self) -> &dyn Any {
         self
+    }
+
+    fn to_lua_component(&self) -> LuaComponent {
+        LuaComponent::new(self.clone())
     }
 }
 

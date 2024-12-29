@@ -9,11 +9,7 @@ components:
       coords:
         x: 0.0
         y: 0.0
-        z: 0.0
-      rotation:
-        yaw: 0.0
-        pitch: 0.0
-        roll: 0.0
+      rotation: 0.0
       map_id: "map01"
 children:
   - template: skeleton_bow

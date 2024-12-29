@@ -1,10 +1,10 @@
-use crate::models::entity::{Entity, EntityId};
+use crate::models::entity::Entity;
 use std::collections::HashMap;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct GameWorld {
     pub map_id: String,
-    pub entities: HashMap<EntityId, Entity>,
+    pub entities: HashMap<String, Entity>,
 }
 
 impl GameWorld {
@@ -15,17 +15,17 @@ impl GameWorld {
         }
     }
 
-    pub fn put_entity(&mut self, entity: Entity) -> EntityId {
+    pub fn put_entity(&mut self, entity: Entity) -> String {
         let entity_id = entity.id.clone();
         self.entities.insert(entity_id.clone(), entity);
         entity_id
     }
 
-    pub fn get_entity(&self, id: EntityId) -> Option<&Entity> {
+    pub fn get_entity(&self, id: String) -> Option<&Entity> {
         self.entities.get(&id)
     }
 
-    pub fn get_entity_mut(&mut self, id: EntityId) -> Option<&mut Entity> {
+    pub fn get_entity_mut(&mut self, id: String) -> Option<&mut Entity> {
         self.entities.get_mut(&id)
     }
 }
