@@ -56,8 +56,7 @@ pub struct ComponentTemplate {
 pub async fn load_entity_template(
 	name: &str,
 ) -> Result<EntityTemplate, Box<dyn std::error::Error>> {
-	let yaml_content =
-		fs::read_to_string(format!("./src/data/entity_templates/{}.yaml", name)).await?;
+	let yaml_content = fs::read_to_string(format!("./data/entity_templates/{}.yaml", name)).await?;
 	let template: EntityTemplate = serde_yaml::from_str(&yaml_content)?;
 	Ok(template)
 }

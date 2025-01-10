@@ -5,7 +5,7 @@ use mlua::{Lua, Result};
 use super::lua_entity::LuaEntity;
 use common::models::context::ServerContext;
 
-pub fn execute_lua_script(script: &str, context: OnceLock<ServerContext>) -> Result<()> {
+pub fn lua_get_entity(entity: &str, context: OnceLock<ServerContext>) -> Result<LuaEntity> {
 	let lua = Lua::new();
 	let globals = lua.globals();
 
@@ -22,5 +22,6 @@ pub fn execute_lua_script(script: &str, context: OnceLock<ServerContext>) -> Res
 			}
 		})?,
 	)?;
-	lua.load(script).exec()
+	lua.load(format!("return query_entity(\"{}\")", entity))
+		.eval::<LuaEntity>()
 }

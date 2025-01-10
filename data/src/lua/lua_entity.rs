@@ -2,7 +2,7 @@ use mlua::{Error, FromLua, Lua, UserData, UserDataFields, UserDataMethods, Value
 
 use common::models::entity::Entity;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct LuaEntity {
 	pub id: String,
 	pub entity: Box<Entity>,
@@ -51,17 +51,10 @@ impl UserData for LuaEntity {
 }
 
 impl FromLua for LuaEntity {
-	fn from_lua(value: Value, _: &Lua) -> mlua::Result<Self> {
-		if let Value::Table(table) = value {
-			let _: String = table.get("id")?;
-			let component = table.get::<LuaEntity>("entity")?;
-			Ok(component)
-		} else {
-			Err(mlua::Error::FromLuaConversionError {
-				from: value.type_name(),
-				to: "LuaEntity".to_string(),
-				message: Some("Expected a table with 'id' and 'entity'".to_string()),
-			})
+	fn from_lua(value: Value, _: &Lua) -> Result<Self, Error> {
+		match value {
+			Value::UserData(ud) => Ok(ud.borrow::<Self>()?.clone()),
+			_ => unreachable!(),
 		}
 	}
 }

@@ -14,6 +14,14 @@ pub struct Entity {
 }
 
 impl Entity {
+	pub fn new_with_id(id: String) -> Self {
+		Self {
+			id: id,
+			components: HashMap::new(),
+			parts: Vec::new(),
+		}
+	}
+
 	pub fn new() -> Self {
 		Self {
 			id: nanoid::nanoid!(16),
