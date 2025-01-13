@@ -14,19 +14,11 @@ pub struct Entity {
 }
 
 impl Entity {
-	pub fn new_with_id(id: String) -> Self {
-		Self {
-			id: id,
-			components: HashMap::new(),
-			parts: Vec::new(),
-		}
-	}
-
 	pub fn new() -> Self {
 		Self {
 			id: nanoid::nanoid!(16),
-			components: HashMap::new(),
-			parts: Vec::new(),
+			components: Default::default(),
+			parts: Default::default(),
 		}
 	}
 
@@ -97,6 +89,12 @@ impl Entity {
 
 	pub fn remove_part(&mut self, part_id: &String) {
 		self.parts.retain(|part| part.id != *part_id);
+	}
+}
+
+impl Default for Entity {
+	fn default() -> Self {
+		Self::new()
 	}
 }
 

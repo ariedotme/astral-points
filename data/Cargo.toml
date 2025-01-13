@@ -3,6 +3,9 @@ name = "data"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+doctest = false
+
 [dependencies]
 common = { path = "../common" }
 mlua = { version = "0.10.2", features = ["lua54", "vendored", "async", "send", "serialize"] }

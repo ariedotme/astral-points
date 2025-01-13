@@ -35,3 +35,9 @@ impl ServerContext {
 			.map(|entry| entry.value().clone())
 	}
 }
+
+impl Default for ServerContext {
+	fn default() -> Self {
+		Self::new()
+	}
+}

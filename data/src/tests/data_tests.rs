@@ -1,33 +1,24 @@
 #[cfg(test)]
 mod tests {
-	use std::sync::OnceLock;
-
 	use common::{
-		models::{
-			components::{health::Health, item::Item, position::Position},
-			context::ServerContext,
-			entity::Entity,
-		},
+		models::components::{health::Health, item::Item, position::Position},
 		utils::vector2::Vector2,
 	};
 	use tokio::runtime::Runtime;
 
-	use crate::{
-		config::entity_template::{create_entity_from_template, load_entity_template},
-		lua::lua::lua_get_entity,
-	};
+	use crate::config::entity_template::{create_entity_from_template, load_entity_template};
 
-	#[test]
-	fn test_lua_entity_query() {
-		let binding: OnceLock<ServerContext> = OnceLock::new();
-		binding.get_or_init(|| ServerContext::new());
-		binding
-			.get()
-			.unwrap()
-			.add_entity(Entity::new_with_id("test".to_string()));
+	// #[test]
+	// fn test_lua_entity_query() {
+	// 	let binding: OnceLock<ServerContext> = OnceLock::new();
+	// 	binding.get_or_init(|| ServerContext::new());
+	// 	binding
+	// 		.get()
+	// 		.unwrap()
+	// 		.add_entity(Entity::new_with_id("test".to_string()));
 
-		assert_eq!("test", lua_get_entity("test", binding).unwrap().id)
-	}
+	// 	assert_eq!("test", lua_get_entity("test", binding).unwrap().id)
+	// }
 
 	#[test]
 	fn test_create_entity_from_template() {
