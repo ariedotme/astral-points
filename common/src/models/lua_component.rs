@@ -17,6 +17,7 @@ impl LuaComponent {
 	}
 }
 
+
 impl UserData for LuaComponent {
 	fn add_methods<M: UserDataMethods<Self>>(methods: &mut M) {
 		methods.add_method("get_name", |_, this, ()| Ok(this.name.to_string()));

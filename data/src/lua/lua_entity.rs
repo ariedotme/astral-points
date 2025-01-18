@@ -2,6 +2,7 @@ use mlua::{Error, FromLua, Lua, UserData, UserDataFields, UserDataMethods, Value
 
 use common::models::entity::Entity;
 
+
 #[derive(Debug, Clone)]
 pub struct LuaEntity {
 	pub id: String,
